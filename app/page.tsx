@@ -49,7 +49,7 @@ export default function Home() {
       <EasterEgg />
       
       {/* Resume Component (hidden, used for PDF generation) */}
-      <div className="hidden">
+      <div style={{ position: "absolute", left: "-9999px", top: "0", visibility: "hidden" }}>
         <Resume />
       </div>
     </main>

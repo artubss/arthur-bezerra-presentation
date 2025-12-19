@@ -1,23 +1,66 @@
 "use client";
 
-import { useRef } from "react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { useRef, useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+
+// Importações dinâmicas para evitar problemas de SSR
+const jsPDF = dynamic(() => import("jspdf").then((mod) => mod.default), { ssr: false });
+const html2canvas = dynamic(() => import("html2canvas"), { ssr: false });
 
 export default function Resume() {
   const resumeRef = useRef<HTMLDivElement>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const downloadPDF = async () => {
-    if (!resumeRef.current) return;
+    if (!resumeRef.current) {
+      alert("Erro: Elemento do currículo não encontrado.");
+      return;
+    }
+
+    setIsGenerating(true);
 
     try {
-      const canvas = await html2canvas(resumeRef.current, {
+      // Aguardar um pouco para garantir que tudo está renderizado
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Importar dinamicamente
+      const { default: jsPDF } = await import("jspdf");
+      const html2canvas = (await import("html2canvas")).default;
+
+      // Criar um elemento temporário visível para captura
+      const element = resumeRef.current;
+      
+      // Tornar visível temporariamente para captura (fora da tela mas renderizado)
+      element.style.position = "fixed";
+      element.style.left = "0";
+      element.style.top = "0";
+      element.style.visibility = "visible";
+      element.style.display = "block";
+      element.style.zIndex = "9999";
+      element.style.width = "210mm"; // A4 width
+      element.style.maxWidth = "210mm";
+
+      // Aguardar renderização
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
+        backgroundColor: "#ffffff",
+        width: element.scrollWidth,
+        height: element.scrollHeight,
       });
 
-      const imgData = canvas.toDataURL("image/png");
+      // Restaurar estilo original (ocultar novamente)
+      element.style.position = "absolute";
+      element.style.left = "-9999px";
+      element.style.top = "0";
+      element.style.visibility = "hidden";
+      element.style.display = "block";
+      element.style.zIndex = "-1";
+
+      const imgData = canvas.toDataURL("image/png", 1.0);
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -33,13 +76,19 @@ export default function Resume() {
       pdf.save("Arthur-Bezerra-Curriculo.pdf");
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
-      alert("Erro ao gerar PDF. Tente novamente.");
+      alert(`Erro ao gerar PDF: ${error instanceof Error ? error.message : "Erro desconhecido"}`);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
   return (
     <>
-      <div ref={resumeRef} className="bg-white text-gray-900 p-8 max-w-4xl mx-auto">
+      <div 
+        ref={resumeRef} 
+        className="bg-white text-gray-900 p-8 max-w-4xl mx-auto"
+        style={{ position: "absolute", left: "-9999px", top: "0", visibility: "hidden" }}
+      >
         {/* Header */}
         <div className="border-b-4 border-indigo-600 pb-4 mb-6">
           <h1 className="text-4xl font-bold text-indigo-600 mb-2">Arthur Bezerra</h1>
@@ -266,11 +315,12 @@ export default function Resume() {
       {/* Botão de Download (invisível, será chamado externamente) */}
       <button
         onClick={downloadPDF}
+        disabled={isGenerating}
         className="hidden"
         id="download-resume-btn"
         aria-label="Download PDF"
       >
-        Download
+        {isGenerating ? "Gerando PDF..." : "Download"}
       </button>
     </>
   );
@@ -279,6 +329,8 @@ export default function Resume() {
 // Exportar função para download
 export const downloadResumePDF = () => {
   const btn = document.getElementById("download-resume-btn");
-  if (btn) btn.click();
+  if (btn && !btn.hasAttribute("disabled")) {
+    btn.click();
+  }
 };
 
