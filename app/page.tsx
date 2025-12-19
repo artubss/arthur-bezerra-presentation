@@ -9,6 +9,7 @@ import Journey from "@/components/sections/Journey";
 import WhyAdapta from "@/components/sections/WhyAdapta";
 import Contact from "@/components/sections/Contact";
 import EasterEgg from "@/components/EasterEgg";
+import Resume from "@/components/Resume";
 
 export default function Home() {
   return (
@@ -46,6 +47,11 @@ export default function Home() {
       <WhyAdapta />
       <Contact />
       <EasterEgg />
+      
+      {/* Resume Component (hidden, used for PDF generation) */}
+      <div className="hidden">
+        <Resume />
+      </div>
     </main>
   );
 }

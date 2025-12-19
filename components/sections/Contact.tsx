@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Mail, Linkedin, Github, MessageCircle, Download } from "lucide-react";
+import { downloadResumePDF } from "@/components/Resume";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 60 },
@@ -121,6 +122,7 @@ export default function Contact() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={downloadResumePDF}
               className="px-8 py-4 bg-white/5 border-2 border-primary/50 rounded-lg text-text font-semibold text-lg hover:bg-primary/10 hover:border-primary transition-all flex items-center space-x-2 mx-auto"
             >
               <Download className="w-5 h-5" />

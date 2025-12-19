@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown, Download, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { downloadResumePDF } from "@/components/Resume";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 60 },
@@ -154,6 +155,7 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={downloadResumePDF}
                 className="px-8 py-4 bg-white/5 border border-white/10 rounded-lg text-text font-semibold text-lg hover:bg-white/10 transition-all flex items-center justify-center space-x-2"
               >
                 <Download className="w-5 h-5" />
