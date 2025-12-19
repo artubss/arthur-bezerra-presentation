@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    formats: ['image/avif', 'image/webp'],
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [],
     unoptimized: false,
   },
@@ -17,5 +17,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-
-
