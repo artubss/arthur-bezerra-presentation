@@ -28,9 +28,9 @@ const contacts = [
   {
     name: "Email",
     icon: Mail,
-    href: "mailto:arthurbezerra.dev@gmail.com",
+    href: "mailto:arthur@vicentimmed.com.br",
     color: "from-blue-500 to-cyan-500",
-    label: "arthurbezerra.dev@gmail.com",
+    label: "arthur@vicentimmed.com.br",
   },
   {
     name: "LinkedIn",

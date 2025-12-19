@@ -14,7 +14,7 @@ const resumeContent = {
     header: {
       name: "Arthur Bezerra",
       title: "Automation Developer | Full Stack Developer | n8n Specialist",
-      email: "arthurbezerra.dev@gmail.com",
+      email: "arthur@vicentimmed.com.br",
       linkedin: "linkedin.com/in/arthur-n8n-dev",
       github: "github.com/artubss",
       whatsapp: "+55 84 99419-8787",
@@ -242,7 +242,7 @@ const resumeContent = {
     header: {
       name: "Arthur Bezerra",
       title: "Automation Developer | Full Stack Developer | n8n Specialist",
-      email: "arthurbezerra.dev@gmail.com",
+      email: "arthur@vicentimmed.com.br",
       linkedin: "linkedin.com/in/arthur-n8n-dev",
       github: "github.com/artubss",
       whatsapp: "+55 84 99419-8787",

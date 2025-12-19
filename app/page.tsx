@@ -34,7 +34,7 @@ export default function Home() {
         Vamos construir juntos?
         
         - Arthur Bezerra
-        arthurbezerra.dev@gmail.com (placeholder)
+        arthur@vicentimmed.com.br
       */}
       <ScrollProgress />
       <Navbar />
