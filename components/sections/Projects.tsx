@@ -61,7 +61,7 @@ const projects = [
     icon: Workflow,
     gradient: "from-blue-500 to-cyan-500",
     stats: "24/7 | 100+ pacientes/dia",
-    image: null,
+    image: "/images/image11.png",
   },
   {
     title: "Automação de Conteúdo com IA",
