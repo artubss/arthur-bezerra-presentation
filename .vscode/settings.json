@@ -1,0 +1,7 @@
+{
+  "titan.extension.excludedFromBuild": [
+    "\\node_modules\\@emnapi",
+    "\\node_modules\\@tybys",
+    "\\node_modules\\@napi-rs"
+  ]
+}
