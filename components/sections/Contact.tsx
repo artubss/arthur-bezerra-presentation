@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mail, Linkedin, Github, MessageCircle, Download } from "lucide-react";
+import { Mail, Linkedin, Github, MessageCircle, Download, Languages } from "lucide-react";
+import { useState } from "react";
 import { downloadResumePDF } from "@/components/Resume";
 
 const fadeInUp = {
@@ -55,6 +56,21 @@ const contacts = [
 ];
 
 export default function Contact() {
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const [selectedLang, setSelectedLang] = useState<"pt" | "en">("pt");
+
+  const handleDownload = (lang: "pt" | "en") => {
+    setSelectedLang(lang);
+    setShowLangMenu(false);
+    // Chamar função global exposta pelo componente Resume
+    if ((window as any).downloadResumePDFWithLang) {
+      (window as any).downloadResumePDFWithLang(lang);
+    } else {
+      // Fallback para função antiga
+      downloadResumePDF(lang);
+    }
+  };
+
   return (
     <section
       id="contact"
@@ -114,20 +130,57 @@ export default function Contact() {
             })}
           </motion.div>
 
-          {/* Download CV */}
+          {/* Download CV with Language Selector */}
           <motion.div
             variants={fadeInUp}
-            className="text-center"
+            className="text-center relative"
           >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={downloadResumePDF}
-              className="px-8 py-4 bg-white/5 border-2 border-primary/50 rounded-lg text-text font-semibold text-lg hover:bg-primary/10 hover:border-primary transition-all flex items-center space-x-2 mx-auto"
-            >
-              <Download className="w-5 h-5" />
-              <span>Baixar Currículo (PDF)</span>
-            </motion.button>
+            <div className="inline-flex items-center gap-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleDownload(selectedLang)}
+                className="px-8 py-4 bg-white/5 border-2 border-primary/50 rounded-lg text-text font-semibold text-lg hover:bg-primary/10 hover:border-primary transition-all flex items-center space-x-2"
+              >
+                <Download className="w-5 h-5" />
+                <span>Baixar Currículo (PDF)</span>
+              </motion.button>
+              
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowLangMenu(!showLangMenu)}
+                  className="px-4 py-4 bg-white/5 border-2 border-primary/50 rounded-lg text-text font-semibold hover:bg-primary/10 hover:border-primary transition-all"
+                >
+                  <Languages className="w-5 h-5" />
+                </motion.button>
+                
+                {showLangMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute right-0 mt-2 w-48 bg-background border border-primary/30 rounded-lg shadow-lg z-50 overflow-hidden"
+                  >
+                    <button
+                      onClick={() => handleDownload("pt")}
+                      className="w-full px-4 py-3 text-left text-text hover:bg-primary/10 transition-colors flex items-center gap-2"
+                    >
+                      <span>🇧🇷</span>
+                      <span>Português</span>
+                    </button>
+                    <button
+                      onClick={() => handleDownload("en")}
+                      className="w-full px-4 py-3 text-left text-text hover:bg-primary/10 transition-colors flex items-center gap-2 border-t border-primary/10"
+                    >
+                      <span>🇺🇸</span>
+                      <span>English</span>
+                    </button>
+                  </motion.div>
+                )}
+              </div>
+            </div>
           </motion.div>
 
           {/* Footer Message */}

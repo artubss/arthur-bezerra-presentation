@@ -1,58 +1,588 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 
 // Importações dinâmicas para evitar problemas de SSR
 const jsPDF = dynamic(() => import("jspdf").then((mod) => mod.default), { ssr: false });
 const html2canvas = dynamic(() => import("html2canvas"), { ssr: false });
 
+type Language = "pt" | "en";
+
+const resumeContent = {
+  pt: {
+    header: {
+      name: "Arthur Bezerra",
+      title: "Automation Developer | Full Stack Developer | n8n Specialist",
+      email: "arthurbezerra.dev@gmail.com",
+      linkedin: "linkedin.com/in/arthur-n8n-dev",
+      github: "github.com/artubss",
+      whatsapp: "+55 84 99419-8787",
+      location: "Brasil",
+      age: "24 anos",
+    },
+    sections: {
+      summary: {
+        title: "Resumo Profissional",
+        content: "Automation Developer com 2 anos de experiência intensiva em desenvolvimento de sistemas escaláveis e automações complexas. Especialista em n8n, integrações WhatsApp, automações com IA e desenvolvimento full stack.",
+        results: [
+          "Reduzi custos operacionais em 60% através de automações inteligentes",
+          "Sistemas processando 5 mil+ transações/dia em produção 24/7",
+          "Time-to-market de 3-5 dias para MVPs funcionais",
+          "50+ workflows n8n em produção atendendo clientes reais",
+        ],
+        closing: "Transição de Medicina para Tecnologia demonstra adaptabilidade e paixão por construir soluções que resolvem problemas reais. Experiência em produção com clientes reais, sistemas 24/7 e deploy rápido.",
+      },
+      n8n: {
+        title: "Expertise em n8n",
+        subtitle: "Especialização Avançada:",
+        items: [
+          "50+ workflows em produção gerenciando operações críticas",
+          "Custom nodes development para integrações específicas",
+          "Webhooks complexos e error handling robusto",
+          "Integração com 20+ serviços externos (APIs, databases, messaging)",
+          "Otimização de performance (500+ execuções/minuto)",
+          "Arquitetura de workflows escaláveis e manuteníveis",
+          "Debugging e monitoramento de sistemas em produção",
+        ],
+      },
+      experience: [
+        {
+          company: "Vicentimmed",
+          role: "Automation Developer | Full Stack",
+          period: "Mar 2025 - Presente (3 meses)",
+          items: [
+            "Desenvolvimento de automações com n8n em produção 24/7",
+            "Integrações WhatsApp (Uazapi, Evolution API) processando 300+ mensagens/dia",
+            "Desenvolvimento full stack com Next.js e Node.js",
+            "Integração com APIs de IA (Gemini, OpenAI) para atendimento inteligente",
+            "Gerenciamento de banco de dados PostgreSQL/Supabase",
+            "Redução de 85% no tempo de resposta ao cliente",
+          ],
+        },
+        {
+          company: "Cachina",
+          role: "Automation Developer | Full Stack",
+          period: "Out 2024 - Fev 2025 (5 meses)",
+          items: [
+            "Criação de workflows automatizados com n8n para múltiplos clientes",
+            "Desenvolvimento de sistemas de automação escaláveis",
+            "Integrações com múltiplas APIs e serviços (REST/GraphQL)",
+            "Manutenção e otimização de sistemas em produção",
+            "Implementação de error handling e retry logic",
+          ],
+          note: "Saí por melhores condições de trabalho e crescimento profissional",
+        },
+      ],
+      solutions: {
+        title: "Soluções Implementadas",
+        items: [
+          { text: "Automação de atendimento com IA", result: "Redução de 80% no tempo de resposta" },
+          { text: "Migração de sistemas legados", result: "Arquitetura moderna e escalável" },
+          { text: "Integração multi-canal", result: "WhatsApp, Email, SMS, Web unificada" },
+          { text: "Pipelines de dados", result: "Análise e Business Intelligence" },
+          { text: "Sistemas de notificação em tempo real", result: "WebSockets" },
+          { text: "E-commerce completo", result: "Pagamentos e emissão de notas fiscais" },
+          { text: "Agentes de IA", result: "Triagem e atendimento automatizado" },
+        ],
+      },
+      projects: [
+        {
+          title: "E-commerce WhatsApp - Loja Completa",
+          stack: "Next.js + Node.js + Uazapi + Gemini AI",
+          description: "Sistema completo de e-commerce migrado do WhatsApp para web. Inclui:",
+          features: [
+            "Autenticação segura (JWT + OAuth)",
+            "Interfaces cliente/admin responsivas",
+            "Emissão automática de notas fiscais",
+            "Integração com Supabase e GitHub Storage",
+          ],
+          result: "Aumento de 150% nas vendas online",
+        },
+        {
+          title: "Sistema de Automação para Clínica",
+          stack: "n8n + Supabase + WhatsApp API + IA",
+          description: "Sistema 24/7 com agendamentos automatizados:",
+          features: [
+            "Agentes de IA para triagem inteligente",
+            "Atendendo 300+ pacientes diariamente",
+            "Redução de 60% nos custos operacionais",
+            "Taxa de satisfação de 95%",
+          ],
+        },
+        {
+          title: "Automação de Conteúdo com IA",
+          stack: "RSS → Blog → LinkedIn automatizado",
+          description: "Pipeline completo de geração e publicação:",
+          features: [
+            "Gemini AI para criação de conteúdo",
+            "n8n para orquestração",
+            "PostgreSQL para armazenamento",
+            "Publicação multi-canal sincronizada",
+          ],
+          result: "100+ posts publicados automaticamente",
+        },
+      ],
+      skills: {
+        title: "Stack Técnico",
+        categories: [
+          {
+            name: "Backend & Automação",
+            items: [
+              "n8n (Avançado - Especialista)",
+              "Node.js / TypeScript",
+              "REST API / GraphQL",
+              "Webhooks & API Integration",
+              "PostgreSQL / Supabase",
+              "Redis / BullMQ",
+              "Cron Jobs / Schedulers",
+              "Serverless Functions (AWS Lambda, Vercel)",
+              "API Rate Limiting & Retry Logic",
+              "ETL & Data Transformation",
+              "Docker",
+            ],
+          },
+          {
+            name: "Frontend",
+            items: [
+              "Next.js / React",
+              "TypeScript",
+              "Tailwind CSS",
+              "Framer Motion",
+              "State Management (Zustand, Redux)",
+              "Authentication (JWT, OAuth, NextAuth)",
+              "Real-time (WebSockets, Socket.io)",
+            ],
+          },
+          {
+            name: "IA & Integrações",
+            items: [
+              "LangChain / LangGraph",
+              "OpenAI / Gemini AI",
+              "WhatsApp APIs (Evolution API, Uazapi)",
+              "pgvector",
+              "Prompt Engineering",
+            ],
+          },
+          {
+            name: "DevOps & Cloud",
+            items: [
+              "AWS (EC2, S3, Lambda)",
+              "Vercel",
+              "Docker",
+              "Git / GitHub",
+              "CI/CD Pipelines",
+            ],
+          },
+          {
+            name: "Ferramentas & Testes",
+            items: [
+              "Postman / Insomnia",
+              "Cursor / Windsurf",
+              "Lovable",
+              "Firebase",
+              "Looker",
+              "Jest / Vitest",
+            ],
+          },
+          {
+            name: "Pagamentos & Serviços",
+            items: [
+              "Payment Gateways (Stripe, Mercado Pago)",
+              "Integrações bancárias e financeiras",
+            ],
+          },
+        ],
+      },
+      competencies: {
+        title: "Competências Técnicas & Comportamentais",
+        items: [
+          "Resolução de problemas complexos com automação e arquitetura escalável",
+          "Comunicação técnica com stakeholders não-técnicos (tradução de requisitos)",
+          "Gestão de projetos ágeis (Scrum/Kanban) e entrega contínua",
+          "Code Review e documentação técnica detalhada",
+          "Troubleshooting e debugging em produção sob pressão",
+          "Ownership e responsabilidade end-to-end dos projetos",
+          "Aprendizado rápido de novas tecnologias e ferramentas",
+        ],
+      },
+      education: {
+        title: "Formação & Jornada",
+        items: [
+          "2022-2024: Transição de Medicina para Tecnologia - Autodidata intensivo",
+          "2024-2025: 2 anos de experiência intensiva construindo sistemas em produção",
+          "2025: Experiência profissional consolidada como Automation Developer",
+        ],
+      },
+      languages: {
+        title: "Idiomas",
+        items: [
+          { flag: "🇧🇷", name: "Português", level: "Nativo" },
+          { flag: "🇺🇸", name: "Inglês", level: "Fluente" },
+          { flag: "🇪🇸", name: "Espanhol", level: "Fluente" },
+          { flag: "🇩🇪", name: "Alemão", level: "Intermediário" },
+        ],
+      },
+      differentiators: {
+        title: "Diferenciais",
+        items: [
+          "Transição de Medicina para Tech demonstra adaptabilidade e determinação",
+          "Experiência em produção com clientes reais desde os primeiros meses",
+          "Deploy rápido: sistemas em produção em dias, não meses",
+          "Obsessão por excelência: refatoro código que funciona porque pode ser melhor",
+          "Iniciativa proativa: resolvo problemas antes de serem solicitados",
+          "Curiosidade constante: aprendo novas ferramentas todo fim de semana",
+          "Mentalidade de produto: penso no impacto no negócio, não só no código",
+        ],
+      },
+      availability: "Disponível para: Projetos remotos | Consultoria em automação | Desenvolvimento full stack | Implementação n8n",
+    },
+  },
+  en: {
+    header: {
+      name: "Arthur Bezerra",
+      title: "Automation Developer | Full Stack Developer | n8n Specialist",
+      email: "arthurbezerra.dev@gmail.com",
+      linkedin: "linkedin.com/in/arthur-n8n-dev",
+      github: "github.com/artubss",
+      whatsapp: "+55 84 99419-8787",
+      location: "Brazil",
+      age: "24 years old",
+    },
+    sections: {
+      summary: {
+        title: "Professional Summary",
+        content: "Automation Developer with 2 years of intensive experience in scalable systems development and complex automations. Specialist in n8n, WhatsApp integrations, AI automations, and full stack development.",
+        results: [
+          "Reduced operational costs by 60% through intelligent automations",
+          "Systems processing 5k+ transactions/day in 24/7 production",
+          "3-5 day time-to-market for functional MVPs",
+          "50+ n8n workflows in production serving real clients",
+        ],
+        closing: "Transition from Medicine to Technology demonstrates adaptability and passion for building solutions that solve real problems. Production experience with real clients, 24/7 systems, and fast deployment.",
+      },
+      n8n: {
+        title: "n8n Expertise",
+        subtitle: "Advanced Specialization:",
+        items: [
+          "50+ workflows in production managing critical operations",
+          "Custom nodes development for specific integrations",
+          "Complex webhooks and robust error handling",
+          "Integration with 20+ external services (APIs, databases, messaging)",
+          "Performance optimization (500+ executions/minute)",
+          "Scalable and maintainable workflow architecture",
+          "Debugging and monitoring of production systems",
+        ],
+      },
+      experience: [
+        {
+          company: "Vicentimmed",
+          role: "Automation Developer | Full Stack",
+          period: "Mar 2025 - Present (3 months)",
+          items: [
+            "Development of n8n automations in 24/7 production",
+            "WhatsApp integrations (Uazapi, Evolution API) processing 300+ messages/day",
+            "Full stack development with Next.js and Node.js",
+            "Integration with AI APIs (Gemini, OpenAI) for intelligent support",
+            "PostgreSQL/Supabase database management",
+            "85% reduction in customer response time",
+          ],
+        },
+        {
+          company: "Cachina",
+          role: "Automation Developer | Full Stack",
+          period: "Oct 2024 - Feb 2025 (5 months)",
+          items: [
+            "Creation of automated workflows with n8n for multiple clients",
+            "Development of scalable automation systems",
+            "Integrations with multiple APIs and services (REST/GraphQL)",
+            "Maintenance and optimization of production systems",
+            "Implementation of error handling and retry logic",
+          ],
+          note: "Left for better working conditions and professional growth",
+        },
+      ],
+      solutions: {
+        title: "Implemented Solutions",
+        items: [
+          { text: "AI-powered customer service automation", result: "80% reduction in response time" },
+          { text: "Legacy system migration", result: "Modern and scalable architecture" },
+          { text: "Multi-channel integration", result: "Unified WhatsApp, Email, SMS, Web" },
+          { text: "Data pipelines", result: "Analysis and Business Intelligence" },
+          { text: "Real-time notification systems", result: "WebSockets" },
+          { text: "Complete e-commerce", result: "Payments and invoice generation" },
+          { text: "AI agents", result: "Automated triage and customer service" },
+        ],
+      },
+      projects: [
+        {
+          title: "WhatsApp E-commerce - Complete Store",
+          stack: "Next.js + Node.js + Uazapi + Gemini AI",
+          description: "Complete e-commerce system migrated from WhatsApp to web. Includes:",
+          features: [
+            "Secure authentication (JWT + OAuth)",
+            "Responsive client/admin interfaces",
+            "Automatic invoice generation",
+            "Integration with Supabase and GitHub Storage",
+          ],
+          result: "150% increase in online sales",
+        },
+        {
+          title: "Clinic Automation System",
+          stack: "n8n + Supabase + WhatsApp API + AI",
+          description: "24/7 system with automated scheduling:",
+          features: [
+            "AI agents for intelligent triage",
+            "Serving 300+ patients daily",
+            "60% reduction in operational costs",
+            "95% satisfaction rate",
+          ],
+        },
+        {
+          title: "AI Content Automation",
+          stack: "RSS → Blog → LinkedIn automated",
+          description: "Complete content generation and publishing pipeline:",
+          features: [
+            "Gemini AI for content creation",
+            "n8n for orchestration",
+            "PostgreSQL for storage",
+            "Synchronized multi-channel publishing",
+          ],
+          result: "100+ posts published automatically",
+        },
+      ],
+      skills: {
+        title: "Technical Stack",
+        categories: [
+          {
+            name: "Backend & Automation",
+            items: [
+              "n8n (Advanced - Specialist)",
+              "Node.js / TypeScript",
+              "REST API / GraphQL",
+              "Webhooks & API Integration",
+              "PostgreSQL / Supabase",
+              "Redis / BullMQ",
+              "Cron Jobs / Schedulers",
+              "Serverless Functions (AWS Lambda, Vercel)",
+              "API Rate Limiting & Retry Logic",
+              "ETL & Data Transformation",
+              "Docker",
+            ],
+          },
+          {
+            name: "Frontend",
+            items: [
+              "Next.js / React",
+              "TypeScript",
+              "Tailwind CSS",
+              "Framer Motion",
+              "State Management (Zustand, Redux)",
+              "Authentication (JWT, OAuth, NextAuth)",
+              "Real-time (WebSockets, Socket.io)",
+            ],
+          },
+          {
+            name: "AI & Integrations",
+            items: [
+              "LangChain / LangGraph",
+              "OpenAI / Gemini AI",
+              "WhatsApp APIs (Evolution API, Uazapi)",
+              "pgvector",
+              "Prompt Engineering",
+            ],
+          },
+          {
+            name: "DevOps & Cloud",
+            items: [
+              "AWS (EC2, S3, Lambda)",
+              "Vercel",
+              "Docker",
+              "Git / GitHub",
+              "CI/CD Pipelines",
+            ],
+          },
+          {
+            name: "Tools & Testing",
+            items: [
+              "Postman / Insomnia",
+              "Cursor / Windsurf",
+              "Lovable",
+              "Firebase",
+              "Looker",
+              "Jest / Vitest",
+            ],
+          },
+          {
+            name: "Payments & Services",
+            items: [
+              "Payment Gateways (Stripe, Mercado Pago)",
+              "Banking and financial integrations",
+            ],
+          },
+        ],
+      },
+      competencies: {
+        title: "Technical & Behavioral Competencies",
+        items: [
+          "Complex problem solving with automation and scalable architecture",
+          "Technical communication with non-technical stakeholders (requirement translation)",
+          "Agile project management (Scrum/Kanban) and continuous delivery",
+          "Code Review and detailed technical documentation",
+          "Troubleshooting and debugging in production under pressure",
+          "Ownership and end-to-end project responsibility",
+          "Fast learning of new technologies and tools",
+        ],
+      },
+      education: {
+        title: "Education & Journey",
+        items: [
+          "2022-2024: Transition from Medicine to Technology - Intensive self-taught",
+          "2024-2025: 2 years of intensive experience building systems in production",
+          "2025: Consolidated professional experience as Automation Developer",
+        ],
+      },
+      languages: {
+        title: "Languages",
+        items: [
+          { flag: "🇧🇷", name: "Portuguese", level: "Native" },
+          { flag: "🇺🇸", name: "English", level: "Fluent" },
+          { flag: "🇪🇸", name: "Spanish", level: "Fluent" },
+          { flag: "🇩🇪", name: "German", level: "Intermediate" },
+        ],
+      },
+      differentiators: {
+        title: "Differentiators",
+        items: [
+          "Transition from Medicine to Tech demonstrates adaptability and determination",
+          "Production experience with real clients since the first months",
+          "Fast deployment: systems in production in days, not months",
+          "Excellence obsession: refactor code that works because it can be better",
+          "Proactive initiative: solve problems before they are requested",
+          "Constant curiosity: learn new tools every weekend",
+          "Product mindset: think about business impact, not just code",
+        ],
+      },
+      availability: "Available for: Remote projects | Automation consulting | Full stack development | n8n implementation",
+    },
+  },
+};
+
 export default function Resume() {
   const resumeRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [language, setLanguage] = useState<Language>("pt");
 
-  const downloadPDF = async () => {
+  const content = resumeContent[language];
+
+  const downloadPDF = useCallback(async () => {
     if (!resumeRef.current) {
-      alert("Erro: Elemento do currículo não encontrado.");
+      alert(language === "pt" ? "Erro: Elemento do currículo não encontrado." : "Error: Resume element not found.");
       return;
     }
 
     setIsGenerating(true);
 
     try {
-      // Aguardar um pouco para garantir que tudo está renderizado
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Importar dinamicamente
       const { default: jsPDF } = await import("jspdf");
       const html2canvas = (await import("html2canvas")).default;
 
-      // Criar um elemento temporário visível para captura
       const element = resumeRef.current;
       
-      // Tornar visível temporariamente para captura (fora da tela mas renderizado)
       element.style.position = "fixed";
       element.style.left = "0";
       element.style.top = "0";
       element.style.visibility = "visible";
       element.style.display = "block";
       element.style.zIndex = "9999";
-      element.style.width = "210mm"; // A4 width
+      element.style.width = "210mm";
       element.style.maxWidth = "210mm";
+      element.style.fontSize = "12px";
 
-      // Aguardar renderização
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-        width: element.scrollWidth,
-        height: element.scrollHeight,
-      });
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+      const contentWidth = pdfWidth - (margin * 2);
+      const maxHeight = pdfHeight - (margin * 2);
 
-      // Restaurar estilo original (ocultar novamente)
+      // Dividir conteúdo em seções para múltiplas páginas
+      const sections = element.querySelectorAll("section, .resume-section");
+      let currentY = margin;
+      let pageNumber = 1;
+
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i] as HTMLElement;
+        
+        // Criar um container temporário apenas para esta seção
+        const tempContainer = document.createElement("div");
+        tempContainer.style.position = "absolute";
+        tempContainer.style.left = "-9999px";
+        tempContainer.style.width = "210mm";
+        tempContainer.style.backgroundColor = "white";
+        tempContainer.appendChild(section.cloneNode(true));
+        document.body.appendChild(tempContainer);
+
+        const canvas = await html2canvas(tempContainer, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff",
+          width: tempContainer.scrollWidth,
+          height: tempContainer.scrollHeight,
+        });
+
+        document.body.removeChild(tempContainer);
+
+        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+        
+        // Se a seção não cabe na página atual, criar nova página
+        if (currentY + imgHeight > pdfHeight - margin && currentY > margin) {
+          pdf.addPage();
+          currentY = margin;
+          pageNumber++;
+        }
+
+        // Se a imagem é muito grande, dividir em partes
+        if (imgHeight > maxHeight) {
+          const parts = Math.ceil(imgHeight / maxHeight);
+          const partHeight = canvas.height / parts;
+          
+          for (let part = 0; part < parts; part++) {
+            if (part > 0) {
+              pdf.addPage();
+              currentY = margin;
+              pageNumber++;
+            }
+
+            const sourceY = part * partHeight;
+            const sourceHeight = Math.min(partHeight, canvas.height - sourceY);
+            const scaledHeight = (sourceHeight * contentWidth) / canvas.width;
+
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = sourceHeight;
+            const ctx = tempCanvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
+            }
+
+            const imgData = tempCanvas.toDataURL("image/png", 1.0);
+            pdf.addImage(imgData, "PNG", margin, currentY, contentWidth, scaledHeight);
+            currentY += scaledHeight + 5;
+          }
+        } else {
+          const imgData = canvas.toDataURL("image/png", 1.0);
+          pdf.addImage(imgData, "PNG", margin, currentY, contentWidth, imgHeight);
+          currentY += imgHeight + 10;
+        }
+      }
+
+      // Restaurar estilo original
       element.style.position = "absolute";
       element.style.left = "-9999px";
       element.style.top = "0";
@@ -60,334 +590,255 @@ export default function Resume() {
       element.style.display = "block";
       element.style.zIndex = "-1";
 
-      const imgData = canvas.toDataURL("image/png", 1.0);
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgScaledWidth = imgWidth * ratio;
-      const imgScaledHeight = imgHeight * ratio;
-      const xOffset = (pdfWidth - imgScaledWidth) / 2;
-      const yOffset = 0;
-
-      pdf.addImage(imgData, "PNG", xOffset, yOffset, imgScaledWidth, imgScaledHeight);
-      pdf.save("Arthur-Bezerra-Curriculo.pdf");
+      const fileName = language === "pt" 
+        ? "Arthur-Bezerra-Curriculo.pdf" 
+        : "Arthur-Bezerra-Resume.pdf";
+      pdf.save(fileName);
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
       alert(`Erro ao gerar PDF: ${error instanceof Error ? error.message : "Erro desconhecido"}`);
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [language]);
+
+  // Expor função de download para uso externo
+  useEffect(() => {
+    (window as any).downloadResumePDFWithLang = (lang: Language) => {
+      setLanguage(lang);
+      // Aguardar atualização do estado antes de gerar PDF
+      setTimeout(() => {
+        downloadPDF();
+      }, 300);
+    };
+  }, [downloadPDF]);
 
   return (
     <>
       <div 
         ref={resumeRef} 
         className="bg-white text-gray-900 p-8 max-w-4xl mx-auto"
-        style={{ position: "absolute", left: "-9999px", top: "0", visibility: "hidden" }}
+        style={{ position: "absolute", left: "-9999px", top: "0", visibility: "hidden", fontSize: "12px" }}
       >
         {/* Header */}
-        <div className="border-b-4 border-indigo-600 pb-4 mb-6">
-          <h1 className="text-4xl font-bold text-indigo-600 mb-2">Arthur Bezerra</h1>
-          <h2 className="text-2xl text-gray-700 mb-4">Automation Developer | Full Stack Developer | n8n Specialist</h2>
+        <div className="border-b-4 border-indigo-600 pb-4 mb-6 resume-section">
+          <h1 className="text-4xl font-bold text-indigo-600 mb-2">{content.header.name}</h1>
+          <h2 className="text-2xl text-gray-700 mb-4">{content.header.title}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
-            <div>📧 arthurbezerra.dev@gmail.com</div>
-            <div>💼 linkedin.com/in/arthur-n8n-dev</div>
-            <div>💻 github.com/artubss</div>
-            <div>📱 WhatsApp: +55 84 99419-8787</div>
-            <div>📍 Brasil</div>
-            <div>👤 24 anos</div>
+            <div>📧 {content.header.email}</div>
+            <div>💼 {content.header.linkedin}</div>
+            <div>💻 {content.header.github}</div>
+            <div>📱 WhatsApp: {content.header.whatsapp}</div>
+            <div>📍 {content.header.location}</div>
+            <div>👤 {content.header.age}</div>
           </div>
         </div>
 
         {/* Resumo Profissional */}
-        <section className="mb-6">
+        <section className="mb-6 resume-section">
           <h3 className="text-xl font-bold text-indigo-600 mb-3 border-b-2 border-indigo-200 pb-1">
-            Resumo Profissional
+            {content.sections.summary.title}
           </h3>
-          <p className="text-gray-700 leading-relaxed mb-3">
-            Automation Developer com <strong>2 anos de experiência intensiva</strong> em desenvolvimento de sistemas escaláveis e automações complexas. Especialista em <strong>n8n</strong>, integrações WhatsApp, automações com IA e desenvolvimento full stack.
+          <p className="text-gray-700 leading-relaxed mb-3 text-sm">
+            {content.sections.summary.content}
           </p>
           <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="font-semibold text-gray-800 mb-2">Resultados comprovados:</p>
+            <p className="font-semibold text-gray-800 mb-2 text-sm">Resultados comprovados:</p>
             <ul className="list-none space-y-1 text-sm text-gray-700">
-              <li>✅ Reduzi custos operacionais em <strong>60%</strong> através de automações inteligentes</li>
-              <li>✅ Sistemas processando <strong>5 mil+ transações/dia</strong> em produção 24/7</li>
-              <li>✅ <strong>Time-to-market de 3-5 dias</strong> para MVPs funcionais</li>
-              <li>✅ <strong>50+ workflows n8n</strong> em produção atendendo clientes reais</li>
+              {content.sections.summary.results.map((result, idx) => (
+                <li key={idx}>✅ {result}</li>
+              ))}
             </ul>
           </div>
-          <p className="text-gray-700 leading-relaxed mt-3">
-            Transição de Medicina para Tecnologia demonstra adaptabilidade e paixão por construir soluções que resolvem problemas reais. Experiência em produção com clientes reais, sistemas 24/7 e deploy rápido.
+          <p className="text-gray-700 leading-relaxed mt-3 text-sm">
+            {content.sections.summary.closing}
           </p>
         </section>
 
         {/* Expertise em n8n */}
-        <section className="mb-6">
+        <section className="mb-6 resume-section">
           <h3 className="text-xl font-bold text-indigo-600 mb-3 border-b-2 border-indigo-200 pb-1">
-            Expertise em n8n
+            {content.sections.n8n.title}
           </h3>
-          <p className="font-semibold text-gray-800 mb-2">🔧 Especialização Avançada:</p>
+          <p className="font-semibold text-gray-800 mb-2 text-sm">🔧 {content.sections.n8n.subtitle}</p>
           <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4 text-sm">
-            <li><strong>50+ workflows</strong> em produção gerenciando operações críticas</li>
-            <li><strong>Custom nodes development</strong> para integrações específicas</li>
-            <li><strong>Webhooks complexos</strong> e error handling robusto</li>
-            <li>Integração com <strong>20+ serviços externos</strong> (APIs, databases, messaging)</li>
-            <li><strong>Otimização de performance</strong> (500+ execuções/minuto)</li>
-            <li>Arquitetura de workflows escaláveis e manuteníveis</li>
-            <li>Debugging e monitoramento de sistemas em produção</li>
+            {content.sections.n8n.items.map((item, idx) => (
+              <li key={idx}>{item}</li>
+            ))}
           </ul>
         </section>
 
-        {/* Stack Técnico */}
-        <section className="mb-6">
+        {/* Experiência Profissional */}
+        <section className="mb-6 resume-section">
           <h3 className="text-xl font-bold text-indigo-600 mb-3 border-b-2 border-indigo-200 pb-1">
-            Stack Técnico
+            {language === "pt" ? "Experiência Profissional" : "Professional Experience"}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-2">Backend & Automação</h4>
-              <ul className="text-sm text-gray-700 space-y-1">
-                <li>• <strong>n8n</strong> (Avançado - Especialista)</li>
-                <li>• Node.js / TypeScript</li>
-                <li>• <strong>REST API / GraphQL</strong></li>
-                <li>• <strong>Webhooks & API Integration</strong></li>
-                <li>• PostgreSQL / Supabase</li>
-                <li>• Redis / BullMQ</li>
-                <li>• <strong>Cron Jobs / Schedulers</strong></li>
-                <li>• <strong>Serverless Functions</strong> (AWS Lambda, Vercel)</li>
-                <li>• <strong>API Rate Limiting & Retry Logic</strong></li>
-                <li>• <strong>ETL & Data Transformation</strong></li>
-                <li>• Docker</li>
+
+          {content.sections.experience.map((exp, idx) => (
+            <div key={idx} className="mb-4">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h4 className="font-bold text-lg text-gray-800">{exp.role}</h4>
+                  <p className="text-indigo-600 font-semibold">{exp.company}</p>
+                </div>
+                <span className="text-gray-600 font-medium text-sm">{exp.period}</span>
+              </div>
+              <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4 text-sm">
+                {exp.items.map((item, itemIdx) => (
+                  <li key={itemIdx}>{item}</li>
+                ))}
               </ul>
+              {exp.note && (
+                <p className="text-gray-600 text-xs italic mt-2 ml-4">{exp.note}</p>
+              )}
             </div>
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-2">Frontend</h4>
-              <ul className="text-sm text-gray-700 space-y-1">
-                <li>• Next.js / React</li>
-                <li>• TypeScript</li>
-                <li>• Tailwind CSS</li>
-                <li>• Framer Motion</li>
-                <li>• <strong>State Management</strong> (Zustand, Redux)</li>
-                <li>• <strong>Authentication</strong> (JWT, OAuth, NextAuth)</li>
-                <li>• <strong>Real-time</strong> (WebSockets, Socket.io)</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-2">IA & Integrações</h4>
-              <ul className="text-sm text-gray-700 space-y-1">
-                <li>• LangChain / LangGraph</li>
-                <li>• OpenAI / Gemini AI</li>
-                <li>• WhatsApp APIs (Evolution API, Uazapi)</li>
-                <li>• pgvector</li>
-                <li>• Prompt Engineering</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-2">DevOps & Cloud</h4>
-              <ul className="text-sm text-gray-700 space-y-1">
-                <li>• AWS (EC2, S3, Lambda)</li>
-                <li>• Vercel</li>
-                <li>• Docker</li>
-                <li>• Git / GitHub</li>
-                <li>• CI/CD Pipelines</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-2">Ferramentas & Testes</h4>
-              <ul className="text-sm text-gray-700 space-y-1">
-                <li>• <strong>Postman / Insomnia</strong></li>
-                <li>• Cursor / Windsurf</li>
-                <li>• Lovable</li>
-                <li>• Firebase</li>
-                <li>• Looker</li>
-                <li>• Jest / Vitest</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-2">Pagamentos & Serviços</h4>
-              <ul className="text-sm text-gray-700 space-y-1">
-                <li>• <strong>Payment Gateways</strong> (Stripe, Mercado Pago)</li>
-                <li>• Integrações bancárias e financeiras</li>
-              </ul>
-            </div>
-          </div>
+          ))}
         </section>
 
-        {/* Experiência Profissional */}
-        <section className="mb-6">
+        {/* Stack Técnico */}
+        <section className="mb-6 resume-section">
           <h3 className="text-xl font-bold text-indigo-600 mb-3 border-b-2 border-indigo-200 pb-1">
-            Experiência Profissional
+            {content.sections.skills.title}
           </h3>
-
-          <div className="mb-4">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h4 className="font-bold text-lg text-gray-800">Automation Developer | Full Stack</h4>
-                <p className="text-indigo-600 font-semibold">Vicentimmed</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {content.sections.skills.categories.map((category, idx) => (
+              <div key={idx}>
+                <h4 className="font-semibold text-gray-800 mb-2 text-sm">{category.name}</h4>
+                <ul className="text-xs text-gray-700 space-y-1">
+                  {category.items.map((item, itemIdx) => (
+                    <li key={itemIdx}>• {item}</li>
+                  ))}
+                </ul>
               </div>
-              <span className="text-gray-600 font-medium">Mar 2025 - Presente (3 meses)</span>
-            </div>
-            <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4 text-sm">
-              <li>Desenvolvimento de <strong>automações com n8n em produção</strong> 24/7</li>
-              <li>Integrações WhatsApp (Uazapi, Evolution API) processando <strong>300+ mensagens/dia</strong></li>
-              <li>Desenvolvimento full stack com <strong>Next.js e Node.js</strong></li>
-              <li>Integração com <strong>APIs de IA</strong> (Gemini, OpenAI) para atendimento inteligente</li>
-              <li>Gerenciamento de banco de dados <strong>PostgreSQL/Supabase</strong></li>
-              <li>Redução de <strong>85% no tempo de resposta</strong> ao cliente</li>
-            </ul>
-          </div>
-
-          <div className="mb-4">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h4 className="font-bold text-lg text-gray-800">Automation Developer | Full Stack</h4>
-                <p className="text-indigo-600 font-semibold">Cachina</p>
-              </div>
-              <span className="text-gray-600 font-medium">Jan 2025 - Fev 2025 (2 meses)</span>
-            </div>
-            <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4 text-sm">
-              <li>Criação de <strong>workflows automatizados com n8n</strong> para múltiplos clientes</li>
-              <li>Desenvolvimento de sistemas de automação escaláveis</li>
-              <li>Integrações com <strong>múltiplas APIs e serviços</strong> (REST/GraphQL)</li>
-              <li>Manutenção e otimização de sistemas em produção</li>
-              <li>Implementação de <strong>error handling</strong> e retry logic</li>
-            </ul>
+            ))}
           </div>
         </section>
 
         {/* Soluções Implementadas */}
-        <section className="mb-6">
+        <section className="mb-6 resume-section">
           <h3 className="text-xl font-bold text-indigo-600 mb-3 border-b-2 border-indigo-200 pb-1">
-            Soluções Implementadas
+            {content.sections.solutions.title}
           </h3>
           <ul className="list-none space-y-2 text-gray-700 text-sm">
-            <li>✅ <strong>Automação de atendimento com IA</strong> → Redução de <strong>80% no tempo de resposta</strong></li>
-            <li>✅ <strong>Migração de sistemas legados</strong> para arquitetura moderna e escalável</li>
-            <li>✅ <strong>Integração multi-canal</strong> (WhatsApp, Email, SMS, Web) unificada</li>
-            <li>✅ <strong>Pipelines de dados</strong> para análise e Business Intelligence</li>
-            <li>✅ <strong>Sistemas de notificação em tempo real</strong> com WebSockets</li>
-            <li>✅ <strong>E-commerce completo</strong> com pagamentos e emissão de notas fiscais</li>
-            <li>✅ <strong>Agentes de IA</strong> para triagem e atendimento automatizado</li>
+            {content.sections.solutions.items.map((item, idx) => (
+              <li key={idx}>
+                ✅ <strong>{item.text}</strong> → {item.result}
+              </li>
+            ))}
           </ul>
         </section>
 
         {/* Projetos Destaque */}
-        <section className="mb-6">
+        <section className="mb-6 resume-section">
           <h3 className="text-xl font-bold text-indigo-600 mb-3 border-b-2 border-indigo-200 pb-1">
-            Projetos Destaque
+            {language === "pt" ? "Projetos Destaque" : "Featured Projects"}
           </h3>
           <div className="space-y-4">
-            <div>
-              <h4 className="font-bold text-gray-800">🛒 E-commerce WhatsApp - Loja Completa</h4>
-              <p className="text-sm text-gray-600 mb-1"><strong>Stack:</strong> Next.js + Node.js + Uazapi + Gemini AI</p>
-              <p className="text-gray-700 text-sm mb-1">
-                Sistema completo de e-commerce migrado do WhatsApp para web. Inclui:
-              </p>
-              <ul className="list-disc list-inside text-gray-700 text-sm ml-4 space-y-1">
-                <li>Autenticação segura (JWT + OAuth)</li>
-                <li>Interfaces cliente/admin responsivas</li>
-                <li>Emissão automática de notas fiscais</li>
-                <li>Integração com Supabase e GitHub Storage</li>
-              </ul>
-              <p className="text-gray-700 text-sm mt-1"><strong>Resultado:</strong> Aumento de <strong>150% nas vendas</strong> online</p>
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-800">🏥 Sistema de Automação para Clínica</h4>
-              <p className="text-sm text-gray-600 mb-1"><strong>Stack:</strong> n8n + Supabase + WhatsApp API + IA</p>
-              <p className="text-gray-700 text-sm mb-1">
-                Sistema 24/7 com agendamentos automatizados:
-              </p>
-              <ul className="list-disc list-inside text-gray-700 text-sm ml-4 space-y-1">
-                <li>Agentes de IA para triagem inteligente</li>
-                <li>Atendendo <strong>300+ pacientes diariamente</strong></li>
-                <li>Redução de <strong>60% nos custos operacionais</strong></li>
-                <li>Taxa de satisfação de <strong>95%</strong></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-800">📝 Automação de Conteúdo com IA</h4>
-              <p className="text-sm text-gray-600 mb-1"><strong>Stack:</strong> RSS → Blog → LinkedIn automatizado</p>
-              <p className="text-gray-700 text-sm mb-1">
-                Pipeline completo de geração e publicação:
-              </p>
-              <ul className="list-disc list-inside text-gray-700 text-sm ml-4 space-y-1">
-                <li>Gemini AI para criação de conteúdo</li>
-                <li>n8n para orquestração</li>
-                <li>PostgreSQL para armazenamento</li>
-                <li>Publicação multi-canal sincronizada</li>
-              </ul>
-              <p className="text-gray-700 text-sm mt-1"><strong>Resultado:</strong> <strong>100+ posts</strong> publicados automaticamente</p>
-            </div>
+            {content.sections.projects.map((project, idx) => (
+              <div key={idx}>
+                <h4 className="font-bold text-gray-800 text-sm">
+                  {idx === 0 && "🛒 "}
+                  {idx === 1 && "🏥 "}
+                  {idx === 2 && "📝 "}
+                  {project.title}
+                </h4>
+                <p className="text-xs text-gray-600 mb-1"><strong>Stack:</strong> {project.stack}</p>
+                <p className="text-gray-700 text-xs mb-1">{project.description}</p>
+                <ul className="list-disc list-inside text-gray-700 text-xs ml-4 space-y-1">
+                  {project.features.map((feature, fIdx) => (
+                    <li key={fIdx}>{feature}</li>
+                  ))}
+                </ul>
+                {project.result && (
+                  <p className="text-gray-700 text-xs mt-1"><strong>Resultado:</strong> {project.result}</p>
+                )}
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Competências Técnicas & Comportamentais */}
-        <section className="mb-6">
+        {/* Competências */}
+        <section className="mb-6 resume-section">
           <h3 className="text-xl font-bold text-indigo-600 mb-3 border-b-2 border-indigo-200 pb-1">
-            Competências Técnicas & Comportamentais
+            {content.sections.competencies.title}
           </h3>
           <ul className="list-none space-y-1 text-gray-700 text-sm">
-            <li>✓ <strong>Resolução de problemas complexos</strong> com automação e arquitetura escalável</li>
-            <li>✓ <strong>Comunicação técnica</strong> com stakeholders não-técnicos (tradução de requisitos)</li>
-            <li>✓ <strong>Gestão de projetos ágeis</strong> (Scrum/Kanban) e entrega contínua</li>
-            <li>✓ <strong>Code Review e documentação técnica</strong> detalhada</li>
-            <li>✓ <strong>Troubleshooting e debugging</strong> em produção sob pressão</li>
-            <li>✓ <strong>Ownership</strong> e responsabilidade end-to-end dos projetos</li>
-            <li>✓ <strong>Aprendizado rápido</strong> de novas tecnologias e ferramentas</li>
+            {content.sections.competencies.items.map((item, idx) => (
+              <li key={idx}>✓ {item}</li>
+            ))}
           </ul>
         </section>
 
         {/* Formação */}
-        <section className="mb-6">
+        <section className="mb-6 resume-section">
           <h3 className="text-xl font-bold text-indigo-600 mb-3 border-b-2 border-indigo-200 pb-1">
-            Formação & Jornada
+            {content.sections.education.title}
           </h3>
           <div className="space-y-2 text-gray-700 text-sm">
-            <p><strong>2022-2024:</strong> Transição de Medicina para Tecnologia - Autodidata intensivo</p>
-            <p><strong>2024-2025:</strong> 2 anos de experiência intensiva construindo sistemas em produção</p>
-            <p><strong>2025:</strong> Experiência profissional consolidada como Automation Developer</p>
+            {content.sections.education.items.map((item, idx) => (
+              <p key={idx}>{item}</p>
+            ))}
           </div>
         </section>
 
         {/* Idiomas */}
-        <section className="mb-6">
+        <section className="mb-6 resume-section">
           <h3 className="text-xl font-bold text-indigo-600 mb-3 border-b-2 border-indigo-200 pb-1">
-            Idiomas
+            {content.sections.languages.title}
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-700 text-sm">
-            <div>🇧🇷 <strong>Português:</strong> Nativo</div>
-            <div>🇺🇸 <strong>Inglês:</strong> Fluente</div>
-            <div>🇪🇸 <strong>Espanhol:</strong> Fluente</div>
-            <div>🇩🇪 <strong>Alemão:</strong> Intermediário</div>
+            {content.sections.languages.items.map((lang, idx) => (
+              <div key={idx}>
+                {lang.flag} <strong>{lang.name}:</strong> {lang.level}
+              </div>
+            ))}
           </div>
         </section>
 
         {/* Diferenciais */}
-        <section className="mb-6">
+        <section className="mb-6 resume-section">
           <h3 className="text-xl font-bold text-indigo-600 mb-3 border-b-2 border-indigo-200 pb-1">
-            Diferenciais
+            {content.sections.differentiators.title}
           </h3>
           <ul className="list-none space-y-1 text-gray-700 text-sm">
-            <li>🎯 <strong>Transição de Medicina para Tech</strong> demonstra adaptabilidade e determinação</li>
-            <li>🚀 <strong>Experiência em produção</strong> com clientes reais desde os primeiros meses</li>
-            <li>⚡ <strong>Deploy rápido:</strong> sistemas em produção em dias, não meses</li>
-            <li>💎 <strong>Obsessão por excelência:</strong> refatoro código que funciona porque pode ser melhor</li>
-            <li>🔥 <strong>Iniciativa proativa:</strong> resolvo problemas antes de serem solicitados</li>
-            <li>📚 <strong>Curiosidade constante:</strong> aprendo novas ferramentas todo fim de semana</li>
-            <li>🎓 <strong>Mentalidade de produto:</strong> penso no impacto no negócio, não só no código</li>
+            {content.sections.differentiators.items.map((item, idx) => (
+              <li key={idx}>
+                {idx === 0 && "🎯 "}
+                {idx === 1 && "🚀 "}
+                {idx === 2 && "⚡ "}
+                {idx === 3 && "💎 "}
+                {idx === 4 && "🔥 "}
+                {idx === 5 && "📚 "}
+                {idx === 6 && "🎓 "}
+                {item}
+              </li>
+            ))}
           </ul>
         </section>
 
         {/* Disponibilidade */}
-        <section className="border-t-2 border-indigo-200 pt-4">
-          <p className="text-gray-700 text-sm">
-            <strong>Disponível para:</strong> Projetos remotos | Consultoria em automação | Desenvolvimento full stack | Implementação n8n
-          </p>
+        <section className="border-t-2 border-indigo-200 pt-4 resume-section">
+          <p className="text-gray-700 text-sm">{content.sections.availability}</p>
         </section>
+      </div>
+
+      {/* Language Selector and Download Button */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value as Language)}
+          className="px-4 py-2 bg-white/90 backdrop-blur-sm border border-primary/30 rounded-lg text-sm font-semibold text-gray-800"
+        >
+          <option value="pt">🇧🇷 Português</option>
+          <option value="en">🇺🇸 English</option>
+        </select>
+        <button
+          onClick={downloadPDF}
+          disabled={isGenerating}
+          className="px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/90 disabled:opacity-50"
+        >
+          {isGenerating ? "Gerando..." : language === "pt" ? "Baixar PDF" : "Download PDF"}
+        </button>
       </div>
 
       {/* Botão de Download (invisível, será chamado externamente) */}
@@ -405,9 +856,26 @@ export default function Resume() {
 }
 
 // Exportar função para download
-export const downloadResumePDF = () => {
-  const btn = document.getElementById("download-resume-btn");
-  if (btn && !btn.hasAttribute("disabled")) {
-    btn.click();
+export const downloadResumePDF = (lang: Language = "pt") => {
+  // Encontrar o componente Resume e atualizar o idioma
+  const select = document.querySelector('select[value]') as HTMLSelectElement;
+  if (select) {
+    select.value = lang;
+    const event = new Event('change', { bubbles: true });
+    select.dispatchEvent(event);
   }
+  
+  // Aguardar um pouco para o estado atualizar e então clicar no botão
+  setTimeout(() => {
+    const btn = document.getElementById("download-resume-btn");
+    if (btn) {
+      btn.click();
+    } else {
+      // Se o botão não existir, tentar encontrar o botão de download direto
+      const downloadBtn = document.querySelector('button[onclick*="downloadPDF"]') as HTMLButtonElement;
+      if (downloadBtn) {
+        downloadBtn.click();
+      }
+    }
+  }, 200);
 };
