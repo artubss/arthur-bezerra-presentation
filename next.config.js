@@ -6,7 +6,8 @@ const nextConfig = {
     unoptimized: false,
   },
   reactStrictMode: true,
-  output: 'standalone',
+  // Removido output: 'standalone' para evitar problemas no build
+  // O Dockerfile agora funciona com build padrão
   eslint: {
     ignoreDuringBuilds: true,
   },
